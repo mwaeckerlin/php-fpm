@@ -6,7 +6,7 @@ ENV POST_MAX_SIZE 20M
 ENV UPLOAD_MAX_FILESIZE 10M
 
 RUN apt-get update -y          
-RUN apt-get install -y php5-fpm php5-mysqlnd
+RUN apt-get install -y php5-fpm php5-mysqlnd php5-gnupg
 RUN sed -i 's/^listen *=.*/listen = 9000/' /etc/php5/fpm/pool.d/www.conf
 RUN sed -i 's,^.*access.log *=.*,access.log = /var/log/php5-fpm.log,' /etc/php5/fpm/pool.d/www.conf
 RUN echo "catch_workers_output = yes" >>  /etc/php5/fpm/pool.d/www.conf
