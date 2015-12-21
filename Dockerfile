@@ -4,12 +4,14 @@ MAINTAINER mwaeckerlin
 ENV MEMORY_LIMIT 128M
 ENV POST_MAX_SIZE 20M
 ENV UPLOAD_MAX_FILESIZE 10M
+ENV TERM=xterm
 VOLUME /usr/share/nginx/html
 
 RUN apt-get update -y          
-RUN apt-get install -y php5-fpm php5-mysqlnd php5-gnupg
+RUN apt-get install -y php5-fpm php5-mysqlnd php5-gnupg mysql-client
 RUN sed -i 's/^listen *=.*/listen = 9000/' /etc/php5/fpm/pool.d/www.conf
-RUN sed -i 's,^.*access.log *=.*,access.log = /var/log/php5-fpm.log,' /etc/php5/fpm/pool.d/www.conf
+RUN sed -i 's,^.*access.log *=.*,access.log = /proc/self/fd/1,' /etc/php5/fpm/pool.d/www.conf
+RUN sed -i 's,^.*error_log *=.*,error_log = /proc/self/fd/2,' /etc/php5/fpm/php-fpm.conf
 RUN echo "catch_workers_output = yes" >>  /etc/php5/fpm/pool.d/www.conf
 RUN sed -i 's,\(memory_limit *= *\).*,\1'${MEMORY_LIMIT}',' /etc/php5/fpm/php.ini
 RUN sed -i 's,\(post_max_size *= *\).*,\1'${POST_MAX_SIZE}',' /etc/php5/fpm/php.ini
