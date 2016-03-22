@@ -1,10 +1,10 @@
 FROM ubuntu
 MAINTAINER mwaeckerlin
+ENV TERM xterm
 
 ENV MEMORY_LIMIT 128M
 ENV POST_MAX_SIZE 20M
 ENV UPLOAD_MAX_FILESIZE 10M
-ENV TERM=xterm
 VOLUME /usr/share/nginx/html
 
 RUN apt-get update -y          
