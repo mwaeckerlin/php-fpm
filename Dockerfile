@@ -8,7 +8,7 @@ ENV UPLOAD_MAX_FILESIZE 10M
 VOLUME /usr/share/nginx/html
 
 RUN apt-get update -y          
-RUN apt-get install -y php-fpm php-patchwork-utf8 php-mbstring php-mysqlnd php-gnupg php-ldap mysql-client
+RUN apt-get install -y php-fpm php-patchwork-utf8 php-mbstring php-imagick php-mysqlnd php-gnupg php-ldap mysql-client
 RUN sed -i 's/^listen *=.*/listen = 9000/' /etc/php/7.0/fpm/pool.d/www.conf
 RUN sed -i 's,^.*access.log *=.*,access.log = /proc/self/fd/1,' /etc/php/7.0/fpm/pool.d/www.conf
 RUN sed -i 's,^.*error_log *=.*,error_log = /proc/self/fd/2,' /etc/php/7.0/fpm/php-fpm.conf
