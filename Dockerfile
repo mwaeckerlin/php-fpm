@@ -4,7 +4,7 @@ MAINTAINER mwaeckerlin
 ENV MEMORY_LIMIT 128M
 ENV POST_MAX_SIZE 20M
 ENV UPLOAD_MAX_FILESIZE 10M
-VOLUME /usr/share/nginx/html
+ENV WEB_ROOT_PATH /var/www
 
 RUN apt-get update && apt-get install -y php-fpm php-patchwork-utf8 php-mbstring php-imagick php-mysqlnd php-gnupg php-ldap mysql-client
 RUN sed -i 's/^listen *=.*/listen = 9000/' /etc/php/7.0/fpm/pool.d/www.conf
