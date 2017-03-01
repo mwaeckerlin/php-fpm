@@ -4,10 +4,6 @@ MAINTAINER mwaeckerlin
 ENV MEMORY_LIMIT 128M
 ENV POST_MAX_SIZE 20M
 ENV UPLOAD_MAX_FILESIZE 10M
-ENV SMTP_SERVER mail
-ENV SMTP_PORT 25
-ENV SMTP_USERNAME ""
-ENV SMTP_PASSWORD ""
 ENV WEB_ROOT_PATH /var/www
 
 RUN apt-get update && apt-get install -y php-fpm php-patchwork-utf8 php-mbstring php-imagick php-mysqlnd php-gnupg php-ldap mysql-client
