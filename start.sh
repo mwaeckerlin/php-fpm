@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 
 if ! grep -q 'location ~\* \\\.php$ {' /etc/nginx/conf.d/default.conf; then
     sed -i -e 's,^\([ \t]*index\) \(index.html.*\);,\1 index.php \2;,' /etc/nginx/conf.d/default.conf
@@ -23,6 +23,8 @@ sed -i 's,\(pm\.max_children *= *\).*,\1'${MAX_CHILDREN}',' /etc/php7/php-fpm.d/
 
 for f in /config-*; do
     if test -x $f; then
+        n=${f%.*}
+        echo "**** configuring: ${n#/config-}"
         $f
     fi
 done
