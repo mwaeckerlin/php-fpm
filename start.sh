@@ -14,13 +14,13 @@ if ! grep -q 'location ~\* \\\.php$ {' /etc/nginx/conf.d/default.conf; then
     echo "**** php enabled"
 fi
 
-sed -i 's,\(memory_limit *= *\).*,\1'${MEMORY_LIMIT}',' /etc/php7/php.ini
-sed -i 's,\(post_max_size *= *\).*,\1'${POST_MAX_SIZE}',' /etc/php7/php.ini
-sed -i 's,\(upload_max_filesize *= *\).*,\1'${UPLOAD_MAX_FILESIZE}',' /etc/php7/php.ini
-sed -i 's,\(pm *= *\).*,\1ondemand,' /etc/php7/php-fpm.d/www.conf
-sed -i 's,\(pm\.max_children *= *\).*,\1'${MAX_CHILDREN}',' /etc/php7/php-fpm.d/www.conf
+sed -i 's,\(memory_limit *= *\).*,\1'${MEMORY_LIMIT}',' /etc/php${VPHP}/php.ini
+sed -i 's,\(post_max_size *= *\).*,\1'${POST_MAX_SIZE}',' /etc/php${VPHP}/php.ini
+sed -i 's,\(upload_max_filesize *= *\).*,\1'${UPLOAD_MAX_FILESIZE}',' /etc/php${VPHP}/php.ini
+sed -i 's,\(pm *= *\).*,\1ondemand,' /etc/php${VPHP}/php-fpm.d/www.conf
+sed -i 's,\(pm\.max_children *= *\).*,\1'${MAX_CHILDREN}',' /etc/php${VPHP}/php-fpm.d/www.conf
 
-( echo "[www]"; env | sed -n "s/'/\\\\'/g;s/\([^=]*\)=\(..*\)/env[\1]='\2'/p" ) > /etc/php7/php-fpm.d//env.conf
+( echo "[www]"; env | sed -n "s/'/\\\\'/g;s/\([^=]*\)=\(..*\)/env[\1]='\2'/p" ) > /etc/php${VPHP}/php-fpm.d//env.conf
 
 for f in /config-*; do
     if test -x $f; then
@@ -31,6 +31,6 @@ for f in /config-*; do
 done
 
 echo "**** starting php"
-php-fpm7
+php-fpm${VPHP}
 echo "**** starting nginx"
 /usr/sbin/nginx
