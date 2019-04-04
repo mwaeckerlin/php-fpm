@@ -13,7 +13,7 @@ ENV VPHP "$phpversion"
 USER root
 ADD start.sh /start.sh
 ADD index.php ${WEB_ROOT_PATH}/index.php
-RUN apk add php${VPHP}-fpm \
+RUN ${APKI} php${VPHP}-fpm \
  && sed -i '/user = nobody/d' /etc/php${VPHP}/php-fpm.d/www.conf \
  && sed -i '/group = nobody/d' /etc/php${VPHP}/php-fpm.d/www.conf \
  && sed -i 's/^listen *=.*/listen = 9000/' /etc/php${VPHP}/php-fpm.d/www.conf \
