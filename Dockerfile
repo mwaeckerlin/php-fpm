@@ -12,8 +12,7 @@ ENV CONTAINERNAME="php-fpm"
 ENV VPHP "$phpversion"
 USER root
 ADD start.sh /start.sh
-ADD index.php ${WEB_ROOT_PATH}/index.php
-RUN ${APKI} php${VPHP}-fpm \
+RUN ${PKG_INSTALL} php${VPHP}-fpm \
  && sed -i '/user = nobody/d' /etc/php${VPHP}/php-fpm.d/www.conf \
  && sed -i '/group = nobody/d' /etc/php${VPHP}/php-fpm.d/www.conf \
  && sed -i 's/^listen *=.*/listen = 9000/' /etc/php${VPHP}/php-fpm.d/www.conf \
@@ -26,5 +25,8 @@ RUN ${APKI} php${VPHP}-fpm \
  && sed -i 's,.*error_log = .*,error_log = /proc/1/fd/2,' /etc/php${VPHP}/php-fpm.conf \
  && sed -i 's/display_errors = .*/display_errors = stderr/' /etc/php${VPHP}/php.ini \
  && mkdir /run/php \
- && chown -R $WWWUSER /run/php /etc/php${VPHP}
+ && chown -R $WWWUSER /run/php /etc/php${VPHP} $WEB_ROOT_PATH \
+ && rm -rf $WEB_ROOT_PATH/*
 USER $WWWUSER
+ADD index.php ${WEB_ROOT_PATH}/index.php
+WORKDIR $WEB_ROOT_PATH
