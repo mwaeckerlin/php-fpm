@@ -1,0 +1,17 @@
+version: "3.4"
+services:
+  php-fpm:
+    image: mwaeckerlin/php-fpm
+    build: .
+    volumes:
+      - type: bind
+        source: ./index.php
+        target: /app/index.php
+  nginx:
+    image: mwaeckerlin/nginx
+    ports:
+      - 8080:8080
+    volumes:
+      - type: bind
+        source: ./index.php
+        target: /app/index.php
