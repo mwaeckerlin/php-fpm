@@ -1,6 +1,6 @@
 # Docker Image for serving PHP
 
-This image is less than 8MB in size and has no shell, so it is small, fast and secure.
+This image is less than 16MB in size and has no shell, so it is small, fast and secure.
 
 Serves PHP [FPM] when attached to [mwaeckerlin/nginx] and optionally connects to [mysql]. Used to serve a PHP project.
 

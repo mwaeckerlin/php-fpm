@@ -1,5 +1,5 @@
 FROM mwaeckerlin/very-base as build
-RUN $PKG_INSTALL php-fpm
+RUN ${PKG_INSTALL} php-fpm php-xml php-gd php-session php-json php-ldap php7-openssl
 RUN $ALLOW_USER /var/log/php7
 COPY php-fpm.conf /etc/php7/php-fpm.conf
 COPY www.conf /etc/php7/php-fpm.d/www.conf
