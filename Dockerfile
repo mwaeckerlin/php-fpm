@@ -15,6 +15,7 @@ RUN tar cp \
     | tar xpC /root/
 
 FROM mwaeckerlin/scratch
+WORKDIR /app
 COPY --from=build /root /
 EXPOSE 9000
 ENTRYPOINT [ "/usr/sbin/php-fpm7", "-F", "-R" ]
