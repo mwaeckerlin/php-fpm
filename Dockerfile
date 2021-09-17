@@ -3,6 +3,7 @@ RUN ${PKG_INSTALL} php-fpm php-xml php-gd php-session php-json php-ldap php7-ope
 RUN $ALLOW_USER /var/log/php7 /tmp
 COPY php-fpm.conf /etc/php7/php-fpm.conf
 COPY www.conf /etc/php7/php-fpm.d/www.conf
+COPY php.ini /etc/php7/php.ini
 RUN tar cp \
     /usr/lib/php7 /etc/php7 /var/log/php7 /tmp \
     $(which php-fpm7) \
