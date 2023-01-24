@@ -1,8 +1,8 @@
 # Docker Image for serving PHP
 
-This image is less than 16MB in size and has no shell, so it is small, fast and secure.
+This image is about 34.1MB in size and has no shell, so it is small, fast and secure.
 
-Serves PHP [FPM] when attached to [mwaeckerlin/nginx] and optionally connects to [mysql]. Used to serve a PHP project.
+Serves PHP 8.1 [FPM] when attached to [mwaeckerlin/nginx] and optionally connects to [mysql]. Used to serve a PHP project.
 
 ## Ports
 
@@ -27,5 +27,5 @@ A [mysql] instance or any other database can be linked as, e.g. `mysql`, respect
 [mysql]: https://hub.docker.com/_/mysql "get the image from docker hub"
 [mwaeckerlin/php-fpm]: https://hub.docker.com/r/mwaeckerlin/php-fpm "get the image from docker hub"
 [mwaeckerlin/nginx]: https://hub.docker.com/r/mwaeckerlin/nginx "get the image from docker hub"
-[mwaeckerlin/roundcube]: https://hub.docker.com/r/mwaeckerlin/nginx "get the image from docker hub"
+[mwaeckerlin/roundcube]: https://hub.docker.com/r/mwaeckerlin/roundcube "get the image from docker hub"
 [fpm]: https://php-fpm.org/ "FastCGI Process Manager"
