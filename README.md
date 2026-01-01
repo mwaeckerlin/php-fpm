@@ -33,7 +33,7 @@ A [mysql] instance or any other database can be linked as, e.g. `mysql`, respect
 
 The following Services are based on thois image:
  - [mwaeckerlin/wordpress]
-
+ - [mwaeckerln/mailservice]
 
 
 [mwaeckerlin]: https://marc.wäckerlin.ch/privat/kontakt "contact author Marc Wäckerlin"
@@ -43,3 +43,4 @@ The following Services are based on thois image:
 [mwaeckerlin/roundcube]: https://hub.docker.com/r/mwaeckerlin/roundcube "get the image from docker hub"
 [fpm]: https://php-fpm.org/ "FastCGI Process Manager"
 [mwaeckerlin/wordpress]: https://github.com/mwaeckerlin/wordpress "Secure Minimalistc Wordpress"
+[mwaeckerln/mailservice]: https://github.com/mwaeckerlin/mailservice "Postfix Admin in my Mailservice Package"
