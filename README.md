@@ -1,8 +1,8 @@
-# Docker Image for serving PHP
+# Docker Image for Serving PHP
 
 This image is about 34.1MB in size and has no shell, so it is small, fast and secure.
 
-Serves PHP 8.1 [FPM] when attached to [mwaeckerlin/nginx] and optionally connects to [mysql]. Used to serve a PHP project.
+Serves PHP [FPM] when attached to [mwaeckerlin/nginx] and optionally connects to [mysql]. Used to serve a PHP project. Headless: no shell, only PHP-FPM.
 
 ## Ports
 
@@ -10,7 +10,7 @@ Port `9000` exposes PHP-FPM. This port should not be exposed.
 
 ## Configuration
 
-Mount the same PHP apllication directory to [mwaeckerlin/nginx] and [mwaeckerlin/php-fpm] in path `/app`.
+Mount or fill in the same PHP application directory to [mwaeckerlin/nginx] and [mwaeckerlin/php-fpm] at `/app` (e.g. a volume on `/app/wp-content` for WordPress). Both containers need the same mount so uploads/plugins/theme files stay consistent.
 
 See `docker-compose.yml` for a simple example:
 
