@@ -1,4 +1,4 @@
-# Docker Image for Serving PHP
+# Minimalistic Secure Docker Image for PHP Server
 
 This image is about 39.7MB in size and has no shell, so it is small, fast and secure.
 
