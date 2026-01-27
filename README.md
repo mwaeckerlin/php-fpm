@@ -1,6 +1,6 @@
 # Minimalistic Secure Docker Image for PHP Server
 
-This image is about 39.7MB in size and has no shell, so it is small, fast and secure.
+This image is about 74MB in size and has no shell, so it is small, fast and secure. If built minimalistically without any additional PHP module (`docker compose build --build-arg PHP_MODULES=""`), then the image size is only about 12MB.
 
 Serves PHP [FPM] when attached to [mwaeckerlin/nginx] and optionally connects to [mysql]. Used to serve a PHP project.
 
@@ -10,11 +10,22 @@ This is the most lean and secure image for PHP servers:
  - small attack surface
  - starts as non root user
 
+
+## PHP Modules
+
+By default all often used PHP modules are included in build time argument `PHP_MODULES`, so that you can use this image out of the box in most contexts.
+
+If you need additional PHP modules, or if you want to remove non-needed modules, you may pass your customized `PHP_MODULES` list in `--build-arg`. It must consist of a space separated list of alpine package names. Be aware, that additonal dependencies other than PHP are not automatically copied into the final target image. If your package has additional dependencies, it must be copied into the `tar` command, such as e.g. `/usr/share/ImageMagick*` or `/usr/share/icu`.
+
+Feel free to suggest additional packages that should be part of the default image.
+
+
 ## Ports
 
 Port `9000` exposes PHP-FPM. This port should not be exposed.
 
-## Configuration
+
+## Configuration and Testing
 
 Mount or fill in the same PHP application directory to [mwaeckerlin/nginx] and [mwaeckerlin/php-fpm] at `/app` (e.g. a volume on `/app/wp-content` for WordPress). Both containers need the same mount so uploads/plugins/theme files stay consistent.
 
@@ -25,10 +36,14 @@ See `docker-compose.yml` for a simple example:
 - browse to [http://localhost:8080/] to view the example
 - stop with key `ctrl+c`
 
+By default you see PHP-Info, so you can verify your setup in this simple example.
+
 
 ## MySQL
 
 A [mysql] instance or any other database can be linked as, e.g. `mysql`, respectively, so as a convention, the hostname of the [mysql] server shall be `mysql`. But since you will have to configure MySQL in your PHP application, it can be anything else, as long as it is correctly configured. So details depend on the usage.
+
+Be aware, that [mysql] connection depends on the optional `php-mysqli` module in `PHP_MODULES`.
 
 
 ## Examples
@@ -45,6 +60,7 @@ This is how e.g. the project [mwaeckerlin/wordpress] has been implementend:
 An NGINX server Dockerfile is created plus a PHP-FPM Dockerfile, then they are connected and attached to a database in a docker-compose.yaml file. More details on the specficic usage see directly in [mwaeckerlin/wordpress], this documentation here is about *development* of *own* services based on these source images.
 
 [mwaeckerlin/very-base] is a heavy weight build image based on Alpine and containing some helpful setups and variable definitions. Never bring it to production. I use it to prepare the software in image layers in the first build steps. Then in the final step, the produces outoput is copied to the final target in as few steps as possible to avoid unneeded layers and get smaller images.
+
 
 ### Wordpress NGINX Server
 
