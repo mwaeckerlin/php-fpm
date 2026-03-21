@@ -1,6 +1,6 @@
 FROM mwaeckerlin/very-base AS build
 # PHP modules, override at build time to reduce / extend.
-ARG PHP_MODULES="php-openssl php-json php-mbstring php-session php-mysqli php-xml php-dom php-gd php-ldap php-imap php-curl php-exif php-fileinfo php-zip php-iconv php-intl php-imagick"
+ARG PHP_MODULES="php-apcu php-bcmath php-curl php-dom php-exif php-fileinfo php-gd php-gmp php-iconv php-imagick php-imap php-intl php-json php-ldap php-mbstring php-mysqli php-opcache php-openssl php-pdo_mysql php-session php-xml php-zip"
 RUN ${PKG_INSTALL} php-fpm ${PHP_MODULES}
 # work around bug in php-imagick → wrong / missing dependencies
 RUN if [[ "$PHP_MODULES" =~ php-imagick ]]; then \
