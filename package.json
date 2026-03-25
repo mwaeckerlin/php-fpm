@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "docker compose build",
-    "start": "docker compose up --build --force-recreate --remove-orphans"
+    "start": "docker compose up -d --build --force-recreate --remove-orphans",
+    "stop": "docker compose down"
   }
 }
