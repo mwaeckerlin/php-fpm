@@ -14,7 +14,7 @@ COPY www.conf /etc/php/php-fpm.d/www.conf
 COPY php.ini /etc/php/php.ini
 RUN mv /etc/php /etc/php$(ls -d /var/log/php* | sed 's,/var/log/php,,')
 RUN tar cph \
-    /usr/lib/php* /etc/php* /var/log/php* /tmp \
+    /usr/lib/php* /etc/php$(ls -d /var/log/php* | sed 's,/var/log/php,,') /var/log/php* /tmp \
     /etc/ssl/certs /usr/share/icu \
     /usr/share/ImageMagick* /etc/ImageMagick* /usr/lib/ImageMagick* \
     /etc/fonts /usr/share/fontconfig \
