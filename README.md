@@ -31,10 +31,10 @@ Mount or fill in the same PHP application directory to [mwaeckerlin/nginx] and [
 
 See `docker-compose.yml` for a simple example:
 
-- run `docker-compose build` to build the example
-- run `docker-compose up` to start the example
+- run `npm run build` to build the example
+- run `npm start` (foreground) or `npm run start:daemon` (background) to start the example
 - browse to [http://localhost:8080/] to view the example
-- stop with key `ctrl+c`
+- stop with key `ctrl+c` (or `npm stop` for daemon mode)
 
 By default you see PHP-Info, so you can verify your setup in this simple example.
 
