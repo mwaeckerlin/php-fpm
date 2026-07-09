@@ -17,7 +17,7 @@ COPY php.ini /etc/php/php.ini
 RUN mv /etc/php /etc/php$(ls -d /var/log/php* | sed 's,/var/log/php,,')
 RUN tar cph \
     /usr/lib/php* /etc/php$(ls -d /var/log/php* | sed 's,/var/log/php,,') /var/log/php* /tmp \
-    /etc/ssl/certs /etc/ssl/openssl.cnf /etc/ssl/ct_log_list.cnf /usr/share/icu \
+    /etc/ssl/certs /etc/ssl/cert.pem /etc/ssl/openssl.cnf /etc/ssl/ct_log_list.cnf /usr/share/icu \
     /usr/share/ImageMagick* /etc/ImageMagick* /usr/lib/ImageMagick* \
     /etc/fonts /usr/share/fontconfig \
     /usr/sbin/php-fpm \
