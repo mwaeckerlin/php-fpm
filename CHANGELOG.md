@@ -1,3 +1,6 @@
+- 2026-07-14 **1.1.0**
+    - Das ausgelieferte Image wird neu automatisch darauf geprüft, dass es keine Shell und keine Skriptsprache enthält — wer Codeausführung im Container erreicht, findet dort kein Werkzeug vor, mit dem er weiterkommt
+
 2026-07-09  Marc Wäckerlin
 
 	* 1.0.1: Fix TLS certificate verification. The image now ships OpenSSL's
