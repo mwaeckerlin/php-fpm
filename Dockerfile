@@ -5,9 +5,10 @@ RUN ${PKG_INSTALL} php-fpm ${PHP_MODULES}
 RUN PHP_VERSION="$(ls -d /var/log/php* | sed 's,/var/log/php,,')" && \
     ${PKG_INSTALL} "php${PHP_VERSION}-pecl-apcu" "php${PHP_VERSION}-sysvsem"
 # work around bug in php-imagick → wrong / missing dependencies
-RUN if [[ "$PHP_MODULES" =~ php-imagick ]]; then \
+# POSIX case, not bash [[ =~ ]]: RUN uses busybox sh
+RUN case " $PHP_MODULES " in *" php-imagick "*) \
     ${PKG_INSTALL} php$(ls -d /var/log/php* | sed 's,/var/log/php,,')-pecl-imagick imagemagick-svg librsvg; \
-    fi
+    esac
 RUN $ALLOW_USER /var/log/php* /tmp
 RUN mv /usr/sbin/php-fpm$(ls -d /var/log/php* | sed 's,/var/log/php,,') /usr/sbin/php-fpm
 RUN mv /etc/php$(ls -d /var/log/php* | sed 's,/var/log/php,,') /etc/php
@@ -27,7 +28,9 @@ RUN tar cph \
     | tar xpC /root/
 
 FROM mwaeckerlin/scratch
+ENV CONTAINERNAME="php-fpm"
 WORKDIR /app
 EXPOSE 9000
-ENTRYPOINT [ "/usr/sbin/php-fpm", "-F", "-R", "-O" ]
+# no -R: the image runs as ${RUN_USER}; refusing to start as root is intended
+ENTRYPOINT [ "/usr/sbin/php-fpm", "-F", "-O" ]
 COPY --from=build /root /

@@ -1,12 +1,16 @@
+# Changelog
+
+- 2026-07-17 **1.2.0**
+    - Error messages are never delivered to the client anymore, only written to the container log — previously the image showed PHP errors including paths and internals in the browser (information leak); applications can no longer re-enable this by accident
+        - automatically safeguarded by a new configuration contract test
+    - PHP no longer reveals itself in the HTTP header (signature disabled)
+    - Sessions hardened out of the box: session fixation protection active, session cookie inaccessible to JavaScript and only sent on same-site navigation
+    - The process refuses to start as root — the image always runs as an unprivileged user
+    - Documentation added: deliberate security trade-offs (visible environment variables, large upload limits, internal port) are now described with rationale
+    - README states the role explicitly: runtime image for the final build stage, never a build image
+
 - 2026-07-14 **1.1.0**
-    - Das ausgelieferte Image wird neu automatisch darauf geprüft, dass es keine Shell und keine Skriptsprache enthält — wer Codeausführung im Container erreicht, findet dort kein Werkzeug vor, mit dem er weiterkommt
+    - The shipped image is now automatically verified to contain no shell and no scripting language — an attacker who reaches code execution in the container finds no tool to pivot with
 
-2026-07-09  Marc Wäckerlin
-
-	* 1.0.1: Fix TLS certificate verification. The image now ships OpenSSL's
-	  default CA file (/etc/ssl/cert.pem), which was dropped by the selective
-	  copy into the final scratch image — only /etc/ssl/certs was included, but
-	  not the cert.pem entry point OpenSSL reads by default. As a result any PHP
-	  connection with verify_peer failed with "unknown ca" (e.g. IMAP/SMTP over
-	  TLS in webmail). Derived images (rainloop/SnappyMail, postfixadmin) need a
-	  rebuild to pick this up.
+- 2026-07-09 **1.0.1**
+    - Fix TLS certificate verification. The image now ships OpenSSL's default CA file (/etc/ssl/cert.pem), which was dropped by the selective copy into the final scratch image — only /etc/ssl/certs was included, but not the cert.pem entry point OpenSSL reads by default. As a result any PHP connection with verify_peer failed with "unknown ca" (e.g. IMAP/SMTP over TLS in webmail). Derived images (rainloop/SnappyMail, postfixadmin) need a rebuild to pick this up.

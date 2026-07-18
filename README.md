@@ -10,19 +10,28 @@ This is the most lean and secure image for PHP servers:
  - small attack surface
  - starts as non root user
 
+**Role: production runtime image** — run it as the **final stage** of a multi-stage build (copy your PHP project into `/app`). It is a runtime image, never a build image; it is built via the build-only [mwaeckerlin/very-base] and ships on the runtime base [mwaeckerlin/scratch].
+
 
 ## PHP Modules
 
 By default all often used PHP modules are included in build time argument `PHP_MODULES`, so that you can use this image out of the box in most contexts.
 
-If you need additional PHP modules, or if you want to remove non-needed modules, you may pass your customized `PHP_MODULES` list in `--build-arg`. It must consist of a space separated list of alpine package names. Be aware, that additonal dependencies other than PHP are not automatically copied into the final target image. If your package has additional dependencies, it must be copied into the `tar` command, such as e.g. `/usr/share/ImageMagick*` or `/usr/share/icu`.
+If you need additional PHP modules, or if you want to remove non-needed modules, you may pass your customized `PHP_MODULES` list in `--build-arg`. It must consist of a space separated list of alpine package names. Be aware, that additional dependencies other than PHP are not automatically copied into the final target image. If your package has additional dependencies, it must be copied into the `tar` command, such as e.g. `/usr/share/ImageMagick*` or `/usr/share/icu`.
 
 Feel free to suggest additional packages that should be part of the default image.
 
 
 ## Ports
 
-Port `9000` exposes PHP-FPM. This port should not be exposed.
+Port `9000` exposes PHP-FPM inside the container network. Never publish this port to the host or the internet — only the attached [mwaeckerlin/nginx] container needs to reach it.
+
+## Security Trade-Offs
+
+- **Environment is visible to PHP** (`clear_env = no`): applications are configured through environment variables (e.g. database credentials read by `wp-config.php`), so every PHP script can read the full container environment. Consequence: anything that leaks PHP variables (`phpinfo()`, debug pages) leaks your secrets too — never ship such pages, and only pass the environment variables the application really needs into the container.
+- **Errors are never displayed to clients**: `display_errors` is forced off at pool level (applications cannot re-enable it); errors go to the container log (`stderr`) with full `E_ALL` reporting instead. Verified by `tests/config-contract.sh`.
+- **Large uploads allowed by default** (`upload_max_filesize = 10G`, `post_max_size = 100G`, `max_file_uploads = 1000`): chosen so cloud applications (Nextcloud & co.) work out of the box. If your application does not need huge uploads, lower these values in your derived image's `php.ini` to reduce the resource-exhaustion surface.
+- **Session hardening on by default**: `session.use_strict_mode = 1`, `session.cookie_httponly = 1`, `session.cookie_samesite = "Lax"`. Applications may override these in their own configuration if they must.
 
 
 ## Configuration and Testing
@@ -55,22 +64,22 @@ The following Services are based on this image:
 
 ## Usage in Own Projects
 
-This is how e.g. the project [mwaeckerlin/wordpress] has been implementend:
+This is how e.g. the project [mwaeckerlin/wordpress] has been implemented:
 
-An NGINX server Dockerfile is created plus a PHP-FPM Dockerfile, then they are connected and attached to a database in a docker-compose.yaml file. More details on the specficic usage see directly in [mwaeckerlin/wordpress], this documentation here is about *development* of *own* services based on these source images.
+An NGINX server Dockerfile is created plus a PHP-FPM Dockerfile, then they are connected and attached to a database in a docker-compose.yaml file. More details on the specific usage see directly in [mwaeckerlin/wordpress], this documentation here is about *development* of *own* services based on these source images.
 
-[mwaeckerlin/very-base] is a heavy weight build image based on Alpine and containing some helpful setups and variable definitions. Never bring it to production. I use it to prepare the software in image layers in the first build steps. Then in the final step, the produces outoput is copied to the final target in as few steps as possible to avoid unneeded layers and get smaller images.
+[mwaeckerlin/very-base] is a heavy weight build image based on Alpine and containing some helpful setups and variable definitions. Never bring it to production. I use it to prepare the software in image layers in the first build steps. Then in the final step, the produced output is copied to the final target in as few steps as possible to avoid unneeded layers and get smaller images.
 
 
 ### Wordpress NGINX Server
 
 This is how I built [mwaeckerlin/wordpress-nginx], see there for all details.
 
-First, starting from [mwaeckerlin/very-base] as build environment, copy the latest `wordpress` sources and extract them to `app` (in my images, sofware is always in `app`).
+First, starting from [mwaeckerlin/very-base] as build environment, copy the latest `wordpress` sources and extract them to `app` (in my images, software is always in `app`).
 
 I remove all PHP files for security. All PHP files must be **present** in NGINX, but they don't need to be available, so I just set them to empty files. This way, NGINX knows that the files exist, even though it has no access to the content. This is additional security.
 
-The user may upload files to `/app/wp-content`, so the definition `${ALLOW_USER}` allows the final user in the container to write the files in `wp-content`. `${ALLOW-USER}` is defined in [mwaeckerlin/scratch], see there for all available definitions. All my projects inherit the non privileged `${RUN_USER}` and some helpful definitions from there.
+The user may upload files to `/app/wp-content`, so the definition `${ALLOW_USER}` allows the final user in the container to write the files in `wp-content`. `${ALLOW_USER}` is defined in [mwaeckerlin/scratch], see there for all available definitions. All my projects inherit the non privileged `${RUN_USER}` and some helpful definitions from there.
 
 That's all! Inherit from [mwaeckerlin/nginx] and copy the build targets. All necessary settings, such as `CMD`, `ENV`, `USER`, `WORKDIR` are already defined in that base image.
 
@@ -91,15 +100,15 @@ COPY --from=wordpress /app /app
 
 This is how I built [mwaeckerlin/wordpress-php-fpm], see there for all details.
 
-Then, again starting from [mwaeckerlin/very-base] as build environment, I do the exact same steps as above, because the file layout must be exactly the same. All files not needed by PHP are served from NGINX (that's why I can zero the PHP files there, but not here), where all PHP files and their dependencies come from this image. That's hoiw work is split between NGINX and PHP-FPM.
+Then, again starting from [mwaeckerlin/very-base] as build environment, I do the exact same steps as above, because the file layout must be exactly the same. All files not needed by PHP are served from NGINX (that's why I can zero the PHP files there, but not here), where all PHP files and their dependencies come from this image. That's how work is split between NGINX and PHP-FPM.
 
-Here on the PHP backend, the run-user may not only write to `wp-content`, where external files are uploaded through the web browser, but configuration is written here. That's why I added `wp-secrets` as path to store salts and passwords that are internally created automatically, unless the user optionally specifies them in envoironment variables.
+Here on the PHP backend, the run-user may not only write to `wp-content`, where external files are uploaded through the web browser, but configuration is written here. That's why I added `wp-secrets` as path to store salts and passwords that are internally created automatically, unless the user optionally specifies them in environment variables.
 
-To achieve all this and to adapt runtime environment settings from `docker-compose.yaml` into the container, I created a [`wp-config.php`](https://github.com/mwaeckerlin/wordpress-php-fpm/blob/master/wp-config.php) file that reads the envioronment and uses the given variables or useful defaults at container start and handles the secrets file `wp-secrets/wp-secrets.php`. Therefore I don't need any entrypoint shell script. Since we don't have a shell, we cannot use shell scrips at all. This is an important security feature, since shell scripts in Docker containers are a high risk. An intruder in the container could use them to gain more access.
+To achieve all this and to adapt runtime environment settings from `docker-compose.yaml` into the container, I created a [`wp-config.php`](https://github.com/mwaeckerlin/wordpress-php-fpm/blob/master/wp-config.php) file that reads the environment and uses the given variables or useful defaults at container start and handles the secrets file `wp-secrets/wp-secrets.php`. Therefore I don't need any entrypoint shell script. Since we don't have a shell, we cannot use shell scrips at all. This is an important security feature, since shell scripts in Docker containers are a high risk. An intruder in the container could use them to gain more access.
 
 The secrets file is created at the very first run of the container. It then creates random default values for session and cookie secrets, as well as random salt for secrets. Therefore you should then store `wp-secrets` as well as `wp-content` in persistent volumes.
 
-Also here, in the final step, I introduce all environment variables, copy the build targets from `/app` and that's it. Everything else, all the security, comes for free thank's to my well desiged base images.
+Also here, in the final step, I introduce all environment variables, copy the build targets from `/app` and that's it. Everything else, all the security, comes for free thanks to my well designed base images.
 
 ```Dockerfile
 FROM mwaeckerlin/very-base AS wordpress
@@ -139,13 +148,13 @@ Finally everything is glued together in a `docker-compose.yaml` file. You'll fin
 
 The two Dockerfiles explained above correspond to [mwaeckerlin/wordpress-nginx] and [mwaeckerlin/wordpress-php-fpm] here.
 
-Entrypoint to the outside world is [mwaeckerlin/wordpress-nginx], here mapped to port `8123`. That's the image build from the Dockerfile specified above. It must have an persitent volume to `wp-content`, and the same volume must be shared with [mwaeckerlin/wordpress-php-fpm], because they must see the same files, as explained above.
+Entrypoint to the outside world is [mwaeckerlin/wordpress-nginx], here mapped to port `8123`. That's the image built from the Dockerfile specified above. It must have a persistent volume to `wp-content`, and the same volume must be shared with [mwaeckerlin/wordpress-php-fpm], because they must see the same files, as explained above.
 
 The PHP processes are driven by [mwaeckerlin/wordpress-php-fpm] which needs access to the same `wp-content` volume as well as to a persistent `wp-secrets` volume. Minimum definition is a secret SQL database password and the `WORDPRESS_DB_HOST` (if it's not `mysql`).
 
-As database yo may connect e.g. [mysql] or [mariadb]. Others could work too, but may require changes in the `wp-config.php` (not tested). The database needs to be configured, here with password plus default values for the database and user name. The database also needs a persistant volume.
+As database you may connect e.g. [mysql] or [mariadb]. Others could work too, but may require changes in the `wp-config.php` (not tested). The database needs to be configured, here with password plus default values for the database and user name. The database also needs a persistent volume.
 
-Since the user must be upload (therefore write) files at runtime to `wp-content` and `wp-secrets` must be written at first start, those volumes need to get write access. This is done by mounting them below `/app` in [mwaeckerlin/allow-write-access].
+Since the user must upload (therefore write) files at runtime to `wp-content` and `wp-secrets` must be written at first start, those volumes need to get write access. This is done by mounting them below `/app` in [mwaeckerlin/allow-write-access].
 
 ```yaml
 services:
@@ -196,7 +205,7 @@ volumes:
 [mwaeckerlin/php-fpm]: https://hub.docker.com/r/mwaeckerlin/php-fpm "get the image from docker hub"
 [mwaeckerlin/nginx]: https://github.com/mwaeckerlin/nginx "see the sources and documentation in my github project"
 [mwaeckerlin/very-base]: https://github.com/mwaeckerlin/very-base "see the sources and documentation in my github project"
-[mwaeckerlin/scratch] https://github.com/mwaeckerlin/scratch "nearly empty scratch image, just with some users, groups and definitions that are always needed"
+[mwaeckerlin/scratch]: https://github.com/mwaeckerlin/scratch "nearly empty scratch image, just with some users, groups and definitions that are always needed"
 [mwaeckerlin/roundcube]: https://github.com/mwaeckerlin/roundcube "see the sources and documentation in my github project"
 [fpm]: https://php-fpm.org/ "FastCGI Process Manager"
 [mwaeckerlin/wordpress]: https://github.com/mwaeckerlin/wordpress "Secure Minimalistc Wordpress"
