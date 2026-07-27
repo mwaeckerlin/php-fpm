@@ -38,6 +38,8 @@ Port `9000` exposes PHP-FPM inside the container network. Never publish this por
 
 Mount or fill in the same PHP application directory to [mwaeckerlin/nginx] and [mwaeckerlin/php-fpm] at `/app` (e.g. a volume on `/app/wp-content` for WordPress). Both containers need the same mount so uploads/plugins/theme files stay consistent.
 
+All features are listed in [FEATURES.md](FEATURES.md), all tests in [TESTS.md](TESTS.md). `npm test` runs the docs contract (every feature has a test, no skipped tests), the image contract (headless image), the config contract (production-safe defaults) and the end to end suite under `tests/e2e/`, which starts this image together with [mwaeckerlin/nginx] and verifies the real pairing (PHP execution, front controller, HTTPS signalling, signature and session hardening) with pytest. nginx is a sibling project and consumed as a prebuilt image — a locally built `mwaeckerlin/nginx` takes precedence over the hub version.
+
 See `docker-compose.yml` for a simple example:
 
 - run `npm run build` to build the example

@@ -1,5 +1,10 @@
 # Changelog
 
+- 2026-07-27 **1.2.1**
+    - New end to end test suite runs the image together with mwaeckerlin/nginx and verifies the complete pairing without any extra configuration: PHP execution, front controller routing, HTTPS signalling from the proxy, hidden PHP signature and hardened session cookies
+        - these combination tests moved here from the nginx project, whose suite now runs entirely without PHP
+    - Feature and test registers added (FEATURES.md, TESTS.md) with an automatic guard: every feature must have a test, and no test may be skipped
+
 - 2026-07-17 **1.2.0**
     - Error messages are never delivered to the client anymore, only written to the container log — previously the image showed PHP errors including paths and internals in the browser (information leak); applications can no longer re-enable this by accident
         - automatically safeguarded by a new configuration contract test

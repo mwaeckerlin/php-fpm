@@ -1,14 +1,16 @@
 {
   "name": "@mwaeckerlin/php-fpm",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "scripts": {
     "build": "docker compose build",
     "start": "docker compose up --build --force-recreate --remove-orphans",
     "start:daemon": "docker compose up -d --build --force-recreate --remove-orphans",
     "start:dev": "docker compose up --build --force-recreate --remove-orphans",
     "stop": "docker compose down",
-    "test": "npm run test:image && npm run test:config",
+    "test": "npm run test:docs && npm run test:image && npm run test:config && npm run test:e2e",
+    "test:docs": "bash tests/docs-contract.sh",
     "test:image": "npm run build && bash tests/image-contract.sh mwaeckerlin/php-fpm",
-    "test:config": "bash tests/config-contract.sh mwaeckerlin/php-fpm"
+    "test:config": "bash tests/config-contract.sh mwaeckerlin/php-fpm",
+    "test:e2e": "bash tests/run-e2e.sh"
   }
 }

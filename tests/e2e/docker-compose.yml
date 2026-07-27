@@ -1,0 +1,36 @@
+# E2E stack: the shipped php-fpm image together with mwaeckerlin/nginx, which
+# forwards *.php requests to the FastCGI backend (nginx default php-fpm:9000 —
+# no extra configuration needed), plus a pytest test-runner.
+#
+# nginx is a sibling project and therefore consumed as a prebuilt image, never
+# built from here; a locally built mwaeckerlin/nginx takes precedence over the
+# hub version. Both containers see the same /app so nginx's try_files finds
+# the PHP scripts and php-fpm executes them.
+# distinct project name: both this and the nginx e2e stack live in a
+# directory called e2e — without an explicit name they would collide
+name: php-fpm-e2e
+
+services:
+
+  php-fpm:
+    image: mwaeckerlin/php-fpm
+    build:
+      context: ../..
+    volumes:
+      - ./apps/php:/app:ro
+
+  nginx:
+    image: mwaeckerlin/nginx
+    volumes:
+      - ./apps/php:/app:ro
+    depends_on:
+      - php-fpm
+
+  test-runner:
+    build:
+      context: .
+    depends_on:
+      - nginx
+    environment:
+      PHP_URL: http://nginx:8080
+    command: ["pytest", "-v", "--tb=short"]
