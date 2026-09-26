@@ -1,6 +1,6 @@
 {
   "name": "@mwaeckerlin/php-fpm",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "scripts": {
     "build": "docker compose build",
     "start": "docker compose up --build --force-recreate --remove-orphans",
