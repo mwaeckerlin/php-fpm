@@ -1,5 +1,8 @@
 # Changelog
 
+- 2026-10-21 **1.2.8**
+    - Every build takes the latest release of `install-php-extensions` instead of a fixed version with a fixed checksum
+
 - 2026-10-21 **1.2.7**
     - The build tries the PHP modules up to ten times: pecl.php.net answered the download of apcu with 504 Gateway Timeout on the day of the PHP security release, and the whole build stopped
 

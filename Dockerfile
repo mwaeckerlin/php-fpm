@@ -3,8 +3,7 @@ FROM ${PHP_IMAGE} AS build
 RUN apk upgrade --no-cache --purge --clean-protected
 # PHP modules, override at build time to reduce / extend.
 ARG PHP_MODULES="apcu bcmath exif gd gmp imagick intl ldap mysqli pdo_mysql sysvsem zip"
-ADD --chmod=0755 --checksum=sha256:3f49c71fa66c79b8b2b96bc0ce92885dafd7946f3b5a46f545b390d6f1617e2c \
-    https://github.com/mlocati/docker-php-extension-installer/releases/download/2.12.0/install-php-extensions \
+ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions \
     /usr/local/bin/install-php-extensions
 # PHP's Makefile has a variable PHP_MODULES of its own; pecl.php.net times out under load
 RUN modules="${PHP_MODULES}" && unset PHP_MODULES \
