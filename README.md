@@ -10,7 +10,7 @@ This is the most lean and secure image for PHP servers:
  - small attack surface
  - starts as non root user
 
-**Role: production runtime image** — run it as the **final stage** of a multi-stage build (copy your PHP project into `/app`). It is a runtime image, never a build image; it is built via the build-only [mwaeckerlin/very-base] and ships on the runtime base [mwaeckerlin/scratch].
+Run this production runtime image as the **final stage** of a multi-stage build (copy your PHP project into `/app`). It is a runtime image, never a build image; it is built via the build-only [mwaeckerlin/very-base] and ships on the runtime base [mwaeckerlin/scratch].
 
 
 ## PHP Modules
@@ -24,21 +24,22 @@ Feel free to suggest additional packages that should be part of the default imag
 
 ## Ports
 
-Port `9000` exposes PHP-FPM inside the container network. Never publish this port to the host or the internet — only the attached [mwaeckerlin/nginx] container needs to reach it.
+Port `9000` exposes PHP-FPM inside the container network. Never publish this port to the host or the internet — only the attached [mwaeckerlin/nginx] container needs to reach it.
 
 ## Security Trade-Offs
 
-- **Environment is visible to PHP** (`clear_env = no`): applications are configured through environment variables (e.g. database credentials read by `wp-config.php`), so every PHP script can read the full container environment. Consequence: anything that leaks PHP variables (`phpinfo()`, debug pages) leaks your secrets too — never ship such pages, and only pass the environment variables the application really needs into the container.
+- **Environment is visible to PHP** (`clear_env = no`): applications are configured through environment variables (e.g. database credentials read by `wp-config.php`), so every PHP script can read the full container environment. Consequence: anything that leaks PHP variables (`phpinfo()`, debug pages) leaks your secrets too — never ship such pages, and only pass the environment variables the application really needs into the container.
 - **Errors are never displayed to clients**: `display_errors` is forced off at pool level (applications cannot re-enable it); errors go to the container log (`stderr`) with full `E_ALL` reporting instead. Verified by `tests/config-contract.sh`.
 - **Large uploads allowed by default** (`upload_max_filesize = 10G`, `post_max_size = 100G`, `max_file_uploads = 1000`): chosen so cloud applications (Nextcloud & co.) work out of the box. If your application does not need huge uploads, lower these values in your derived image's `php.ini` to reduce the resource-exhaustion surface.
 - **Session hardening on by default**: `session.use_strict_mode = 1`, `session.cookie_httponly = 1`, `session.cookie_samesite = "Lax"`. Applications may override these in their own configuration if they must.
+- **Session upload progress off** (`session.upload_progress.enabled = Off`): the mitigation named with the leaked details of the remote code execution announced as CVE-2026-109618 and CVE-2026-109619. The pool locks it with `php_admin_flag`, so a `.user.ini` cannot switch it on again. An application loses the upload progress PHP writes into `$_SESSION`; uploads themselves work. The setting goes back to PHP's default once the fixed PHP release is in the image. Verified by `tests/config-contract.sh`.
 
 
 ## Configuration and Testing
 
 Mount or fill in the same PHP application directory to [mwaeckerlin/nginx] and [mwaeckerlin/php-fpm] at `/app` (e.g. a volume on `/app/wp-content` for WordPress). Both containers need the same mount so uploads/plugins/theme files stay consistent.
 
-All features are listed in [FEATURES.md](FEATURES.md), all tests in [TESTS.md](TESTS.md). `npm test` runs the docs contract (every feature has a test, no skipped tests), the image contract (headless image), the config contract (production-safe defaults) and the end to end suite under `tests/e2e/`, which starts this image together with [mwaeckerlin/nginx] and verifies the real pairing (PHP execution, front controller, HTTPS signalling, signature and session hardening) with pytest. nginx is a sibling project and consumed as a prebuilt image — a locally built `mwaeckerlin/nginx` takes precedence over the hub version.
+All features are listed in [FEATURES.md](FEATURES.md), all tests in [TESTS.md](TESTS.md). `npm test` runs the docs contract (every feature has a test, no skipped tests), the image contract (headless image), the config contract (production-safe defaults) and the end to end suite under `tests/e2e/`, which starts this image together with [mwaeckerlin/nginx] and verifies the real pairing (PHP execution, front controller, HTTPS signalling, signature and session hardening) with pytest. nginx is a sibling project and consumed as a prebuilt image — a locally built `mwaeckerlin/nginx` takes precedence over the hub version.
 
 See `docker-compose.yml` for a simple example:
 

@@ -1,5 +1,8 @@
 # Changelog
 
+- 2026-10-21 **1.2.4**
+    - Session upload progress is off, the mitigation named with the leaked details of the remote code execution announced as CVE-2026-109618 and CVE-2026-109619, locked in the pool so a `.user.ini` cannot switch it on again, until the fixed PHP release reaches the Alpine packages
+
 - 2026-09-26 **1.2.3**
     - The test suite installs its Python packages without a warning
 

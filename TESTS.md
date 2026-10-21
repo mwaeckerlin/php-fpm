@@ -22,6 +22,7 @@ pytest runs against the real compose stack.
 
 - **F1** `tests/config-contract.sh` › module_imagick — the conditional imagick install step really ran.
 - **F3** `tests/config-contract.sh` › display_errors_off, display_startup_errors_off — errors are never displayed to clients.
+- **F5** `tests/config-contract.sh` › session_upload_progress_locked, session_upload_progress_off — `php-fpm -i` reports `session.upload_progress.enabled` as Off, and the pool locks it with `php_admin_flag`.
 - **F3** `tests/config-contract.sh` › log_errors_on — errors still reach the container log.
 - **F7** `tests/image-contract.sh` › no sh, no bash, no busybox, no perl — the shipped image is headless.
 
