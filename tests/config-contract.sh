@@ -52,18 +52,12 @@ else
         _fail "${IMAGE}_log_errors_on" "pool does not log errors to stderr"
     fi
 
-    # session upload progress must be off: the mitigation named with the
-    # leaked details of the remote code execution announced as CVE-2026-109618
-    # and CVE-2026-109619, until the fixed PHP release reaches the Alpine
-    # packages
-    # fatal error backtraces off and locked: the advisory of CVE-2026-109619
-    # names them as the producer of the confirmed RCE on PHP 8.5
+    # CVE-2026-109619
     if echo "${CONFIG}" | grep -Eq 'fatal_error_backtraces\] = (off|no|0)'; then
         _pass "${IMAGE}_fatal_error_backtraces_locked"
     else
         _fail "${IMAGE}_fatal_error_backtraces_locked" "the pool does not lock fatal_error_backtraces off"
     fi
-    # the pool locks it with php_admin_flag, so a .user.ini cannot switch it on
     if echo "${CONFIG}" | grep -Eq 'session\.upload_progress\.enabled\] = (off|no|0)'; then
         _pass "${IMAGE}_session_upload_progress_locked"
     else

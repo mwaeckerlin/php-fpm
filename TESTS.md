@@ -20,6 +20,7 @@ pytest runs against the real compose stack.
 
 ## Image contract
 
+- **F1** `tests/module-contract.sh` › modules_of_php-fpm, modules_of_php — php-fpm and the PHP CLI load every module of `tests/expected-modules.txt`, the modules of the image built on the PHP packages of Alpine.
 - **F1** `tests/config-contract.sh` › module_imagick — the conditional imagick install step really ran.
 - **F3** `tests/config-contract.sh` › display_errors_off, display_startup_errors_off — errors are never displayed to clients.
 - **F5** `tests/config-contract.sh` › fatal_error_backtraces_locked — the pool locks `fatal_error_backtraces` off with `php_admin_flag`.

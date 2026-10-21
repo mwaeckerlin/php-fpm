@@ -1,5 +1,10 @@
 # Changelog
 
+- 2026-10-21 **1.2.6**
+    - PHP comes from the official image `php:fpm-alpine` instead of the PHP packages of Alpine: a PHP security release reaches the image within hours, where the Alpine packages took up to a day; every module is compiled against that PHP, and all modules of 1.2.5 load
+    - The image carries the PHP CLI at `/usr/bin/php`, with the same modules and configuration as php-fpm; images built on it no longer copy a CLI of their own
+    - `PHP_MODULES` names PHP modules as `install-php-extensions` knows them instead of Alpine packages; `PHP_IMAGE` selects another PHP branch
+
 - 2026-10-21 **1.2.5**
     - Fatal error backtraces are off, locked in the pool: the advisory of CVE-2026-109619 names them as the producer of the confirmed remote code execution on PHP 8.5; the only complete fix is PHP 8.5.12
 

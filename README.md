@@ -10,16 +10,20 @@ This is the most lean and secure image for PHP servers:
  - small attack surface
  - starts as non root user
 
-Run this production runtime image as the **final stage** of a multi-stage build (copy your PHP project into `/app`). It is a runtime image, never a build image; it is built via the build-only [mwaeckerlin/very-base] and ships on the runtime base [mwaeckerlin/scratch].
+Run this production runtime image as the **final stage** of a multi-stage build (copy your PHP project into `/app`). It is a runtime image, never a build image; PHP comes from the official image [php:fpm-alpine], which follows the newest PHP release, and ships on the runtime base [mwaeckerlin/scratch]. The image carries `php-fpm` at `/usr/sbin/php-fpm` and the PHP CLI at `/usr/bin/php`, with the same modules and configuration.
+
+To build on another PHP branch, pass the official image: `docker compose build --build-arg PHP_IMAGE=php:8.4-fpm-alpine`.
 
 
 ## PHP Modules
 
 By default all often used PHP modules are included in build time argument `PHP_MODULES`, so that you can use this image out of the box in most contexts.
 
-If you need additional PHP modules, or if you want to remove non-needed modules, you may pass your customized `PHP_MODULES` list in `--build-arg`. It must consist of a space separated list of alpine package names. Be aware, that additional dependencies other than PHP are not automatically copied into the final target image. If your package has additional dependencies, it must be copied into the `tar` command, such as e.g. `/usr/share/ImageMagick*` or `/usr/share/icu`.
+If you need additional PHP modules, or if you want to remove non-needed modules, you may pass your customized `PHP_MODULES` list in `--build-arg`. It is a space separated list of PHP module names as [install-php-extensions] knows them, for example `apcu gd imagick intl`; each module is compiled against the PHP of the image, together with the Alpine libraries it needs. The modules the official image compiles in (among them `ctype`, `curl`, `dom`, `mbstring`, `openssl`, `session`, `sodium` and Zend OPcache) are always there. Be aware, that additional files other than the libraries the modules link are not automatically copied into the final target image; they must be added to the `tar` command, such as e.g. `/usr/share/ImageMagick*` or `/usr/share/icu`.
 
-Feel free to suggest additional packages that should be part of the default image.
+An image built on this one adds a module of its own in a build stage `FROM php:fpm-alpine` with `install-php-extensions`, and copies the module from `/usr/local/lib/php/extensions` and its ini file from `/usr/local/etc/php/conf.d` into the same paths of this image.
+
+Feel free to suggest additional modules that should be part of the default image.
 
 
 ## Ports
@@ -211,6 +215,8 @@ volumes:
 [mwaeckerlin/scratch]: https://github.com/mwaeckerlin/scratch "nearly empty scratch image, just with some users, groups and definitions that are always needed"
 [mwaeckerlin/roundcube]: https://github.com/mwaeckerlin/roundcube "see the sources and documentation in my github project"
 [fpm]: https://php-fpm.org/ "FastCGI Process Manager"
+[php:fpm-alpine]: https://hub.docker.com/_/php "the official PHP image, built by docker-library from php.net"
+[install-php-extensions]: https://github.com/mlocati/docker-php-extension-installer "installs PHP modules with the libraries they need"
 [mwaeckerlin/wordpress]: https://github.com/mwaeckerlin/wordpress "Secure Minimalistc Wordpress"
 [mwaeckerlin/wordpress-nginx]: https://github.com/mwaeckerlin/wordpress-nginx "Secure Minimalistc Wordpress NGINX Server"
 [mwaeckerlin/wordpress-fpm-php]: https://github.com/mwaeckerlin/wordpress-fpm-php "Secure Minimalistc Wordpress FPM-PHP Server"
