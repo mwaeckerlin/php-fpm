@@ -2,7 +2,7 @@ ARG PHP_IMAGE=php:fpm-alpine
 FROM ${PHP_IMAGE} AS build
 RUN apk upgrade --no-cache --purge --clean-protected
 # PHP modules, override at build time to reduce / extend.
-ARG PHP_MODULES="apcu bcmath exif gd gmp imagick intl ldap mysqli pdo_mysql sysvsem zip"
+ARG PHP_MODULES="apcu bcmath bz2 exif gd gmp imagick intl ldap mysqli pcntl pdo_mysql sysvsem zip"
 ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions \
     /usr/local/bin/install-php-extensions
 # PHP's Makefile has a variable PHP_MODULES of its own; pecl.php.net times out under load
@@ -32,4 +32,7 @@ WORKDIR /app
 EXPOSE 9000
 # no -R: the image runs as ${RUN_USER}; refusing to start as root is intended
 ENTRYPOINT [ "/usr/sbin/php-fpm", "-F", "-O" ]
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD ["/usr/bin/php", "/usr/local/bin/health.php"]
 COPY --from=build /root /
+COPY --chmod=644 fastcgi.php health.php /usr/local/bin/

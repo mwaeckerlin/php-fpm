@@ -1,6 +1,7 @@
 # measured on 1.2.5 (Alpine packages, PHP 8.5.11), without the SAPI cgi-fcgi
 apcu
 bcmath
+bz2
 core
 ctype
 curl
@@ -23,6 +24,7 @@ mbstring
 mysqli
 mysqlnd
 openssl
+pcntl
 pcre
 pdo
 pdo_mysql

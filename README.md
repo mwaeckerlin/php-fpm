@@ -30,6 +30,10 @@ Feel free to suggest additional modules that should be part of the default image
 
 Port `9000` exposes PHP-FPM inside the container network. Never publish this port to the host or the internet — only the attached [mwaeckerlin/nginx] container needs to reach it.
 
+## Health Check
+
+The image declares a `HEALTHCHECK` that runs `/usr/bin/php /usr/local/bin/health.php`: it sends a FastCGI request for the ping page `/ping` of php-fpm and is healthy when php-fpm answers `pong`. The FastCGI client is `/usr/local/bin/fastcgi.php`; an image built on this one may `require` it and call `fastcgiGet(<script file>, <script name>)` for a check of its own, and declares its own `HEALTHCHECK` to replace this one.
+
 ## Security Trade-Offs
 
 - **Environment is visible to PHP** (`clear_env = no`): applications are configured through environment variables (e.g. database credentials read by `wp-config.php`), so every PHP script can read the full container environment. Consequence: anything that leaks PHP variables (`phpinfo()`, debug pages) leaks your secrets too — never ship such pages, and only pass the environment variables the application really needs into the container.

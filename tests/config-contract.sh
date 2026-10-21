@@ -79,6 +79,32 @@ else
     else
         _fail "${IMAGE}_module_imagick" "imagick module missing — conditional install step did not run"
     fi
+
+    if docker run --rm --pull=never --entrypoint /usr/bin/php "${IMAGE}" /usr/local/bin/health.php > /dev/null 2>&1; then
+        _fail "${IMAGE}_unhealthy_without_php_fpm" "health.php reports healthy although php-fpm does not run"
+    else
+        _pass "${IMAGE}_unhealthy_without_php_fpm"
+    fi
+    CONTAINER=$(docker run -d --rm --pull=never "${IMAGE}")
+    HEALTHY=no
+    for attempt in 1 2 3 4 5 6 7 8 9 10; do
+        if docker exec "${CONTAINER}" /usr/bin/php /usr/local/bin/health.php > /dev/null 2>&1; then
+            HEALTHY=yes
+            break
+        fi
+        sleep 1
+    done
+    docker stop "${CONTAINER}" > /dev/null 2>&1
+    if [[ "${HEALTHY}" == yes ]]; then
+        _pass "${IMAGE}_healthy_with_php_fpm"
+    else
+        _fail "${IMAGE}_healthy_with_php_fpm" "health.php got no pong from the running php-fpm"
+    fi
+    if docker image inspect --format '{{json .Config.Healthcheck.Test}}' "${IMAGE}" | grep -q 'health.php'; then
+        _pass "${IMAGE}_healthcheck_declared"
+    else
+        _fail "${IMAGE}_healthcheck_declared" "the image declares no HEALTHCHECK with health.php"
+    fi
 fi
 
 echo ""

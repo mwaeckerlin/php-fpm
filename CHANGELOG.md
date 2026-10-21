@@ -1,5 +1,9 @@
 # Changelog
 
+- 2026-10-21 **1.2.9**
+    - The modules `pcntl` and `bz2` are back in the default set; Nextcloud recommends both, `occ` uses `pcntl` for signals and the app updates use `bz2` to unpack. `pcntl` had been missing since 2018
+    - The image reports its health to Docker: `HEALTHCHECK` runs `/usr/local/bin/health.php`, which asks the ping page `/ping` of php-fpm over FastCGI; the client `/usr/local/bin/fastcgi.php` is there for derived images too
+
 - 2026-10-21 **1.2.8**
     - Every build takes the latest release of `install-php-extensions` instead of a fixed version with a fixed checksum
 
