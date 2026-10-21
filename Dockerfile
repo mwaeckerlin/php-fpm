@@ -6,8 +6,9 @@ ARG PHP_MODULES="apcu bcmath exif gd gmp imagick intl ldap mysqli pdo_mysql sysv
 ADD --chmod=0755 --checksum=sha256:3f49c71fa66c79b8b2b96bc0ce92885dafd7946f3b5a46f545b390d6f1617e2c \
     https://github.com/mlocati/docker-php-extension-installer/releases/download/2.12.0/install-php-extensions \
     /usr/local/bin/install-php-extensions
-# PHP's Makefile has a variable PHP_MODULES of its own
-RUN modules="${PHP_MODULES}" && unset PHP_MODULES && install-php-extensions ${modules}
+# PHP's Makefile has a variable PHP_MODULES of its own; pecl.php.net times out under load
+RUN modules="${PHP_MODULES}" && unset PHP_MODULES \
+    && for attempt in 1 2 3 4 5 6 7 8 9 10; do install-php-extensions ${modules} && exit 0; sleep 90; done; exit 1
 RUN case " $PHP_MODULES " in *" imagick "*) apk add --no-cache imagemagick-svg librsvg ;; esac
 RUN rm -f /usr/local/etc/php-fpm.d/*.conf /usr/local/etc/php-fpm.conf.default
 COPY php-fpm.conf /usr/local/etc/php-fpm.conf

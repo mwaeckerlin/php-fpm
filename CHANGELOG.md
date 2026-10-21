@@ -1,5 +1,8 @@
 # Changelog
 
+- 2026-10-21 **1.2.7**
+    - The build tries the PHP modules up to ten times: pecl.php.net answered the download of apcu with 504 Gateway Timeout on the day of the PHP security release, and the whole build stopped
+
 - 2026-10-21 **1.2.6**
     - PHP comes from the official image `php:fpm-alpine` instead of the PHP packages of Alpine: a PHP security release reaches the image within hours, where the Alpine packages took up to a day; every module is compiled against that PHP, and all modules of 1.2.5 load
     - The image carries the PHP CLI at `/usr/bin/php`, with the same modules and configuration as php-fpm; images built on it no longer copy a CLI of their own
