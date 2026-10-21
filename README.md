@@ -38,12 +38,24 @@ The image declares a `HEALTHCHECK` that runs `/usr/bin/php /usr/local/bin/health
 
 - **Environment is visible to PHP** (`clear_env = no`): applications are configured through environment variables (e.g. database credentials read by `wp-config.php`), so every PHP script can read the full container environment. Consequence: anything that leaks PHP variables (`phpinfo()`, debug pages) leaks your secrets too — never ship such pages, and only pass the environment variables the application really needs into the container.
 - **Errors are never displayed to clients**: `display_errors` is forced off at pool level (applications cannot re-enable it); errors go to the container log (`stderr`) with full `E_ALL` reporting instead. Verified by `tests/config-contract.sh`.
-- **Large uploads allowed by default** (`upload_max_filesize = 10G`, `post_max_size = 100G`, `max_file_uploads = 1000`): chosen so cloud applications (Nextcloud & co.) work out of the box. If your application does not need huge uploads, lower these values in your derived image's `php.ini` to reduce the resource-exhaustion surface.
+- **Large uploads allowed by default** (`upload_max_filesize = 10G`, `post_max_size = 100G`, `max_file_uploads = 1000`): chosen so cloud applications (Nextcloud & co.) work out of the box. If your application does not need huge uploads, lower them with `UPLOAD_MAX_FILESIZE`, `POST_MAX_SIZE` and `MAX_FILE_UPLOADS` to reduce the resource-exhaustion surface.
 - **Session hardening on by default**: `session.use_strict_mode = 1`, `session.cookie_httponly = 1`, `session.cookie_samesite = "Lax"`. Applications may override these in their own configuration if they must.
 - **Session upload progress off** (`session.upload_progress.enabled = Off`): the mitigation named with the leaked details of the remote code execution announced as CVE-2026-109618 and CVE-2026-109619. The pool locks it with `php_admin_flag`, so a `.user.ini` cannot switch it on again. An application loses the upload progress PHP writes into `$_SESSION`; uploads themselves work. The pool also locks `fatal_error_backtraces` off, which the advisory of CVE-2026-109619 names as the producer of the confirmed remote code execution on PHP 8.5. The settings go back to PHP's default once the fixed PHP release is in the image. Verified by `tests/config-contract.sh`.
 
 
 ## Configuration and Testing
+
+The limits are environment variables with these defaults:
+
+- `MEMORY_LIMIT`: `memory_limit`, default `512M`
+- `UPLOAD_MAX_FILESIZE`: `upload_max_filesize`, default `10G`
+- `POST_MAX_SIZE`: `post_max_size`, default `100G`
+- `MAX_FILE_UPLOADS`: `max_file_uploads`, default `1000`
+- `MAX_EXECUTION_TIME`: `max_execution_time` in seconds, default `30`
+- `MAX_INPUT_TIME`: `max_input_time` in seconds, default `60`
+- `MAX_CHILDREN`: `pm.max_children`, the number of PHP processes, default `50`
+
+A `-d` option of php-fpm and a `php_value` in a pool file still override them.
 
 Mount or fill in the same PHP application directory to [mwaeckerlin/nginx] and [mwaeckerlin/php-fpm] at `/app` (e.g. a volume on `/app/wp-content` for WordPress). Both containers need the same mount so uploads/plugins/theme files stay consistent.
 

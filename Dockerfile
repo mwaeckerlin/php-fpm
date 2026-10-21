@@ -28,6 +28,13 @@ RUN tar cp /usr/sbin/php-fpm /usr/bin/php | tar xpC /root/
 
 FROM mwaeckerlin/scratch
 ENV CONTAINERNAME="php-fpm"
+ENV MEMORY_LIMIT="512M" \
+    UPLOAD_MAX_FILESIZE="10G" \
+    POST_MAX_SIZE="100G" \
+    MAX_FILE_UPLOADS="1000" \
+    MAX_EXECUTION_TIME="30" \
+    MAX_INPUT_TIME="60" \
+    MAX_CHILDREN="50"
 WORKDIR /app
 EXPOSE 9000
 # no -R: the image runs as ${RUN_USER}; refusing to start as root is intended

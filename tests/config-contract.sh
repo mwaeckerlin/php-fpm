@@ -80,6 +80,37 @@ else
         _fail "${IMAGE}_module_imagick" "imagick module missing — conditional install step did not run"
     fi
 
+    # php-fpm -i reports the values the FastCGI SAPI uses; the CLI forces its own time limits
+    _limits() {
+        docker run --rm --pull=never "$@" "${IMAGE}" -i 2>&1 \
+            | sed -n -E 's/^(memory_limit|upload_max_filesize|post_max_size|max_file_uploads|max_execution_time|max_input_time) => ([^ ]+) => .*/\1=\2/p'
+    }
+    EXPECTED=$'max_execution_time=30\nmax_file_uploads=1000\nmax_input_time=60\nmemory_limit=512M\npost_max_size=100G\nupload_max_filesize=10G'
+    DEFAULTS=$(_limits)
+    if [[ "${DEFAULTS}" == "${EXPECTED}" ]]; then
+        _pass "${IMAGE}_php_limits_default"
+    else
+        _fail "${IMAGE}_php_limits_default" "$(echo ${DEFAULTS})"
+    fi
+    EXPECTED=$'max_execution_time=11\nmax_file_uploads=7\nmax_input_time=12\nmemory_limit=256M\npost_max_size=3G\nupload_max_filesize=2G'
+    SET=$(_limits -e MEMORY_LIMIT=256M -e UPLOAD_MAX_FILESIZE=2G -e POST_MAX_SIZE=3G \
+        -e MAX_FILE_UPLOADS=7 -e MAX_EXECUTION_TIME=11 -e MAX_INPUT_TIME=12)
+    if [[ "${SET}" == "${EXPECTED}" ]]; then
+        _pass "${IMAGE}_php_limits_from_environment"
+    else
+        _fail "${IMAGE}_php_limits_from_environment" "$(echo ${SET})"
+    fi
+    if docker run --rm --pull=never "${IMAGE}" -tt 2>&1 | grep -q 'pm.max_children = 50$'; then
+        _pass "${IMAGE}_max_children_default"
+    else
+        _fail "${IMAGE}_max_children_default" "pm.max_children is not 50"
+    fi
+    if docker run --rm --pull=never -e MAX_CHILDREN=9 "${IMAGE}" -tt 2>&1 | grep -q 'pm.max_children = 9$'; then
+        _pass "${IMAGE}_max_children_from_environment"
+    else
+        _fail "${IMAGE}_max_children_from_environment" "MAX_CHILDREN=9 does not reach pm.max_children"
+    fi
+
     if docker run --rm --pull=never --entrypoint /usr/bin/php "${IMAGE}" /usr/local/bin/health.php > /dev/null 2>&1; then
         _fail "${IMAGE}_unhealthy_without_php_fpm" "health.php reports healthy although php-fpm does not run"
     else

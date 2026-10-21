@@ -1,5 +1,8 @@
 # Changelog
 
+- 2026-10-22 **1.2.10**
+    - The PHP limits and the number of PHP processes are environment variables: `MEMORY_LIMIT`, `UPLOAD_MAX_FILESIZE`, `POST_MAX_SIZE`, `MAX_FILE_UPLOADS`, `MAX_EXECUTION_TIME`, `MAX_INPUT_TIME`, `MAX_CHILDREN`, with the values of before as defaults; a derived image no longer has to replace `php.ini`
+
 - 2026-10-21 **1.2.9**
     - The modules `pcntl` and `bz2` are back in the default set; Nextcloud recommends both, `occ` uses `pcntl` for signals and the app updates use `bz2` to unpack. `pcntl` had been missing since 2018
     - The image reports its health to Docker: `HEALTHCHECK` runs `/usr/local/bin/health.php`, which asks the ping page `/ping` of php-fpm over FastCGI; the client `/usr/local/bin/fastcgi.php` is there for derived images too
