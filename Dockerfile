@@ -2,7 +2,7 @@ ARG PHP_IMAGE=php:fpm-alpine
 FROM ${PHP_IMAGE} AS build
 RUN apk upgrade --no-cache --purge --clean-protected
 # PHP modules, override at build time to reduce / extend.
-ARG PHP_MODULES="apcu bcmath bz2 exif gd gmp imagick intl ldap mysqli pcntl pdo_mysql sysvsem zip"
+ARG PHP_MODULES="apcu bcmath bz2 exif gd gmp imagick intl ldap mysqli pcntl pdo_mysql redis sysvsem zip"
 ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions \
     /usr/local/bin/install-php-extensions
 # PHP's Makefile has a variable PHP_MODULES of its own; pecl.php.net times out under load
@@ -34,7 +34,9 @@ ENV MEMORY_LIMIT="512M" \
     MAX_FILE_UPLOADS="1000" \
     MAX_EXECUTION_TIME="30" \
     MAX_INPUT_TIME="60" \
-    MAX_CHILDREN="50"
+    MAX_CHILDREN="50" \
+    OPCACHE_MEMORY_CONSUMPTION="128" \
+    OPCACHE_INTERNED_STRINGS_BUFFER="32"
 WORKDIR /app
 EXPOSE 9000
 # no -R: the image runs as ${RUN_USER}; refusing to start as root is intended

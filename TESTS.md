@@ -26,8 +26,8 @@ pytest runs against the real compose stack.
 - **F5** `tests/config-contract.sh` › fatal_error_backtraces_locked — the pool locks `fatal_error_backtraces` off with `php_admin_flag`.
 - **F5** `tests/config-contract.sh` › session_upload_progress_locked, session_upload_progress_off — `php-fpm -i` reports `session.upload_progress.enabled` as Off, and the pool locks it with `php_admin_flag`.
 - **F3** `tests/config-contract.sh` › log_errors_on — errors still reach the container log.
-- **F10** `tests/config-contract.sh` › php_limits_default, php_limits_from_environment, max_children_default, max_children_from_environment — `php-fpm -i` and `php-fpm -tt` report the defaults, and the values passed with `-e` replace them.
-- **F9** `tests/config-contract.sh` › unhealthy_without_php_fpm, healthy_with_php_fpm, healthcheck_declared — `health.php` fails without a running php-fpm, gets `pong` from the running one, and the image declares it as `HEALTHCHECK`.
+- **F10** `tests/config-contract.sh` › php_limits_default, php_limits_from_environment, max_children_default, max_children_from_environment, opcache_default, opcache_from_environment — `php-fpm -i` and `php-fpm -tt` report the defaults, and the values passed with `-e` replace them.
+- **F9** `tests/config-contract.sh` › unhealthy_without_php_fpm, healthy_with_php_fpm, healthcheck_declared — `health.php` fails without a running php-fpm, gets `pong` from the running one, and the image declares it as `HEALTHCHECK`.
 - **F7** `tests/image-contract.sh` › no sh, no bash, no busybox, no perl — the shipped image is headless.
 
 ## Workflow contract

@@ -31,6 +31,7 @@ pdo_mysql
 posix
 random
 readline
+redis
 reflection
 session
 simplexml

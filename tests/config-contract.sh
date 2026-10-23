@@ -100,6 +100,25 @@ else
     else
         _fail "${IMAGE}_php_limits_from_environment" "$(echo ${SET})"
     fi
+    _opcache() {
+        docker run --rm --pull=never "$@" "${IMAGE}" -i 2>&1 \
+            | sed -n -E 's/^(opcache\.memory_consumption|opcache\.interned_strings_buffer) => ([^ ]+) => .*/\1=\2/p'
+    }
+    EXPECTED=$'opcache.interned_strings_buffer=32\nopcache.memory_consumption=128'
+    DEFAULTS=$(_opcache)
+    if [[ "${DEFAULTS}" == "${EXPECTED}" ]]; then
+        _pass "${IMAGE}_opcache_default"
+    else
+        _fail "${IMAGE}_opcache_default" "$(echo ${DEFAULTS})"
+    fi
+    EXPECTED=$'opcache.interned_strings_buffer=64\nopcache.memory_consumption=256'
+    SET=$(_opcache -e OPCACHE_INTERNED_STRINGS_BUFFER=64 -e OPCACHE_MEMORY_CONSUMPTION=256)
+    if [[ "${SET}" == "${EXPECTED}" ]]; then
+        _pass "${IMAGE}_opcache_from_environment"
+    else
+        _fail "${IMAGE}_opcache_from_environment" "$(echo ${SET})"
+    fi
+
     if docker run --rm --pull=never "${IMAGE}" -tt 2>&1 | grep -q 'pm.max_children = 50$'; then
         _pass "${IMAGE}_max_children_default"
     else

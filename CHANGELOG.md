@@ -1,5 +1,10 @@
 # Changelog
 
+- 2026-10-23 **1.2.11**
+    - The module `redis` is in the default set; Nextcloud uses it for file locking and the distributed cache
+    - The memory of OPcache is set by `OPCACHE_MEMORY_CONSUMPTION` (default `128`) and `OPCACHE_INTERNED_STRINGS_BUFFER` (default `32`, before PHP's own `8`, below which Nextcloud warns)
+    - Session upload progress and fatal error backtraces stay off for good; the release PHP 8.5.12 is reported to be still open to upload-progress key injection
+
 - 2026-10-22 **1.2.10**
     - The PHP limits and the number of PHP processes are environment variables: `MEMORY_LIMIT`, `UPLOAD_MAX_FILESIZE`, `POST_MAX_SIZE`, `MAX_FILE_UPLOADS`, `MAX_EXECUTION_TIME`, `MAX_INPUT_TIME`, `MAX_CHILDREN`, with the values of before as defaults; a derived image no longer has to replace `php.ini`
 
