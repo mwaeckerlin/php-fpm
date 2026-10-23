@@ -28,6 +28,7 @@ pytest runs against the real compose stack.
 - **F3** `tests/config-contract.sh` › log_errors_on — errors still reach the container log.
 - **F10** `tests/config-contract.sh` › php_limits_default, php_limits_from_environment, max_children_default, max_children_from_environment, opcache_default, opcache_from_environment — `php-fpm -i` and `php-fpm -tt` report the defaults, and the values passed with `-e` replace them.
 - **F9** `tests/config-contract.sh` › unhealthy_without_php_fpm, healthy_with_php_fpm, healthcheck_declared — `health.php` fails without a running php-fpm, gets `pong` from the running one, and the image declares it as `HEALTHCHECK`.
+- **F7** `tests/config-contract.sh` › shell_functions_disabled_in_php_fpm, shell_functions_disabled_in_cli_proc_open_kept — `php-fpm -i` lists `exec,shell_exec,system,passthru` in `disable_functions`, and the PHP CLI sees those four as missing and `proc_open` as present.
 - **F7** `tests/image-contract.sh` › no sh, no bash, no busybox, no perl — the shipped image is headless.
 
 ## Workflow contract

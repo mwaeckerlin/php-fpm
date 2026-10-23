@@ -1,5 +1,9 @@
 # Changelog
 
+- 2026-10-23 **1.2.12**
+    - PHP reports `exec`, `shell_exec`, `system` and `passthru` as disabled: the image has no shell, so they could never run a command, and an application that checks `function_exists()` now takes its own way; `proc_open` stays available. Whoever calls these four without checking gets an error from PHP instead of a failed fork
+    - The config contract no longer fails at random: checks that piped the output of `php-fpm -tt` into `grep -q` failed whenever `grep` stopped reading first and php-fpm died on the closed pipe; it happened once on arm64
+
 - 2026-10-23 **1.2.11**
     - The module `redis` is in the default set; Nextcloud uses it for file locking and the distributed cache
     - The memory of OPcache is set by `OPCACHE_MEMORY_CONSUMPTION` (default `128`) and `OPCACHE_INTERNED_STRINGS_BUFFER` (default `32`, before PHP's own `8`, below which Nextcloud warns)

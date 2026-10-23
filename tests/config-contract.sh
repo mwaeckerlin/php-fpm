@@ -34,31 +34,31 @@ else
 
     # display_errors must be forced off for every pool (php_admin_flag, so an
     # application cannot re-enable it); errors still go to stderr via log_errors.
-    if echo "${CONFIG}" | grep -Eq 'display_errors\] = (on|yes|1)'; then
+    if grep -Eq 'display_errors\] = (on|yes|1)' <<<"${CONFIG}"; then
         _fail "${IMAGE}_display_errors_off" "pool forces display_errors on — errors would be shown to clients"
     else
         _pass "${IMAGE}_display_errors_off"
     fi
-    if echo "${CONFIG}" | grep -Eq 'display_startup_errors\] = (on|yes|1)'; then
+    if grep -Eq 'display_startup_errors\] = (on|yes|1)' <<<"${CONFIG}"; then
         _fail "${IMAGE}_display_startup_errors_off" "pool forces display_startup_errors on"
     else
         _pass "${IMAGE}_display_startup_errors_off"
     fi
 
     # errors must still be logged (observability must not be lost by the fix)
-    if echo "${CONFIG}" | grep -Eq 'log_errors\] = (on|yes|1)'; then
+    if grep -Eq 'log_errors\] = (on|yes|1)' <<<"${CONFIG}"; then
         _pass "${IMAGE}_log_errors_on"
     else
         _fail "${IMAGE}_log_errors_on" "pool does not log errors to stderr"
     fi
 
     # CVE-2026-109619
-    if echo "${CONFIG}" | grep -Eq 'fatal_error_backtraces\] = (off|no|0)'; then
+    if grep -Eq 'fatal_error_backtraces\] = (off|no|0)' <<<"${CONFIG}"; then
         _pass "${IMAGE}_fatal_error_backtraces_locked"
     else
         _fail "${IMAGE}_fatal_error_backtraces_locked" "the pool does not lock fatal_error_backtraces off"
     fi
-    if echo "${CONFIG}" | grep -Eq 'session\.upload_progress\.enabled\] = (off|no|0)'; then
+    if grep -Eq 'session\.upload_progress\.enabled\] = (off|no|0)' <<<"${CONFIG}"; then
         _pass "${IMAGE}_session_upload_progress_locked"
     else
         _fail "${IMAGE}_session_upload_progress_locked" "the pool does not lock session.upload_progress.enabled off"
@@ -70,11 +70,24 @@ else
         _fail "${IMAGE}_session_upload_progress_off" "$(grep -i 'session.upload_progress.enabled' <<<"${INFO}" || echo 'setting not reported')"
     fi
 
+    # the image has no shell, so a caller must see these functions as unavailable and take its own way
+    if grep -q '^disable_functions => exec,shell_exec,system,passthru' <<<"${INFO}"; then
+        _pass "${IMAGE}_shell_functions_disabled_in_php_fpm"
+    else
+        _fail "${IMAGE}_shell_functions_disabled_in_php_fpm" "$(grep '^disable_functions' <<<"${INFO}" || echo 'setting not reported')"
+    fi
+    CLI=$(docker run --rm --pull=never --entrypoint /usr/bin/php "${IMAGE}" -r 'foreach (["exec", "shell_exec", "system", "passthru", "proc_open"] as $f) echo $f, "=", function_exists($f) ? "on" : "off", "\n";' 2>&1)
+    if [[ "${CLI}" == $'exec=off\nshell_exec=off\nsystem=off\npassthru=off\nproc_open=on' ]]; then
+        _pass "${IMAGE}_shell_functions_disabled_in_cli_proc_open_kept"
+    else
+        _fail "${IMAGE}_shell_functions_disabled_in_cli_proc_open_kept" "$(echo ${CLI})"
+    fi
+
     # the default module set includes php-imagick; its pecl loader is installed
     # by a conditional Dockerfile step — if that step is silently skipped, the
     # module is missing even though the package list requests it.
     MODULES=$(docker run --rm --pull=never "${IMAGE}" -m 2>&1)
-    if echo "${MODULES}" | grep -qi '^imagick$'; then
+    if grep -qi '^imagick$' <<<"${MODULES}"; then
         _pass "${IMAGE}_module_imagick"
     else
         _fail "${IMAGE}_module_imagick" "imagick module missing — conditional install step did not run"
@@ -119,12 +132,14 @@ else
         _fail "${IMAGE}_opcache_from_environment" "$(echo ${SET})"
     fi
 
-    if docker run --rm --pull=never "${IMAGE}" -tt 2>&1 | grep -q 'pm.max_children = 50$'; then
+    # grep reads the whole output: grep -q stops at the first match, php-fpm then dies on SIGPIPE and pipefail fails the check
+    if grep -q 'pm.max_children = 50$' <<<"${CONFIG}"; then
         _pass "${IMAGE}_max_children_default"
     else
         _fail "${IMAGE}_max_children_default" "pm.max_children is not 50"
     fi
-    if docker run --rm --pull=never -e MAX_CHILDREN=9 "${IMAGE}" -tt 2>&1 | grep -q 'pm.max_children = 9$'; then
+    SET_CONFIG=$(docker run --rm --pull=never -e MAX_CHILDREN=9 "${IMAGE}" -tt 2>&1)
+    if grep -q 'pm.max_children = 9$' <<<"${SET_CONFIG}"; then
         _pass "${IMAGE}_max_children_from_environment"
     else
         _fail "${IMAGE}_max_children_from_environment" "MAX_CHILDREN=9 does not reach pm.max_children"
