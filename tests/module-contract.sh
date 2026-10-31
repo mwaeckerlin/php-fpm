@@ -27,10 +27,20 @@ _modules() {
 echo "==> Module contract: ${IMAGE}"
 echo "        PHP in the image: $(docker run --rm --pull=never "${IMAGE}" -v 2>&1 | head -n 1)"
 
+# a module written as name@8.5 is part of PHP from that branch on
+php_branch=$(docker run --rm --pull=never --entrypoint /usr/bin/php "${IMAGE}" -r 'echo PHP_MAJOR_VERSION, ".", PHP_MINOR_VERSION;' 2>&1)
+expected=$(grep -v -E '^#|^$' tests/expected-modules.txt | while IFS= read -r line; do
+    module="${line%@*}"
+    since="${line#"${module}"}"
+    since="${since#@}"
+    if [[ -z "${since}" || "$(printf '%s\n' "${since}" "${php_branch}" | sort -V | head -n 1)" == "${since}" ]]; then
+        printf '%s\n' "${module}"
+    fi
+done | tr '[:upper:]' '[:lower:]' | sort -u)
+
 for binary in /usr/sbin/php-fpm /usr/bin/php; do
     loaded=$(_modules "${binary}")
-    missing=$(grep -v -E '^#|^$' tests/expected-modules.txt | tr '[:upper:]' '[:lower:]' | sort -u \
-        | comm -23 - <(printf '%s\n' "${loaded}"))
+    missing=$(printf '%s\n' "${expected}" | comm -23 - <(printf '%s\n' "${loaded}"))
     name="modules_of_$(basename "${binary}")"
     echo "        loaded by ${binary}: $(echo ${loaded})"
     if [[ -z "${missing}" ]]; then

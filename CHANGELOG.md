@@ -1,5 +1,8 @@
 # Changelog
 
+- 2026-10-31 **1.2.14**
+    - `mwaeckerlin/php-fpm:8.3` and `mwaeckerlin/php-fpm:8.4` are published: the test of 1.2.13 expected the modules `lexbor` and `uri`, which PHP carries from 8.5 on only, and stopped every image of that version before publication
+
 - 2026-10-31 **1.2.13**
     - The image is also published on the older PHP branches that still get security fixes: `mwaeckerlin/php-fpm:8.4` with PHP 8.4 and `mwaeckerlin/php-fpm:8.3` with PHP 8.3, both on the releases of 21 October 2026 that fix CVE-2026-109618 and CVE-2026-109619, for applications that do not run on PHP 8.5 yet
 

@@ -1,4 +1,5 @@
-# measured on 1.2.5 (Alpine packages, PHP 8.5.11), without the SAPI cgi-fcgi
+# measured on 1.2.5 (Alpine packages, PHP 8.5.11), without the SAPI cgi-fcgi;
+# name@8.5 is a module PHP carries from 8.5 on
 apcu
 bcmath
 bz2
@@ -18,7 +19,7 @@ imagick
 intl
 json
 ldap
-lexbor
+lexbor@8.5
 libxml
 mbstring
 mysqli
@@ -39,7 +40,7 @@ sodium
 spl
 standard
 sysvsem
-uri
+uri@8.5
 xml
 xmlreader
 xmlwriter

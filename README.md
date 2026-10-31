@@ -12,7 +12,7 @@ This is the most lean and secure image for PHP servers:
 
 Run this production runtime image as the **final stage** of a multi-stage build (copy your PHP project into `/app`). It is a runtime image, never a build image; PHP comes from the official image [php:fpm-alpine], which follows the newest PHP release, and ships on the runtime base [mwaeckerlin/scratch]. The image carries `php-fpm` at `/usr/sbin/php-fpm` and the PHP CLI at `/usr/bin/php`, with the same modules and configuration.
 
-For applications that do not run on the newest PHP yet, the same image is also published on the older PHP branches that still get security fixes: `mwaeckerlin/php-fpm:8.4` from `php:8.4-fpm-alpine` and `mwaeckerlin/php-fpm:8.3` from `php:8.3-fpm-alpine`, each also with the day of the build and the version, e.g. `8.4-20261031` and `8.4-1.2.13`. They carry the same modules and configuration and are rebuilt in the same hourly check as `latest`. On PHP 8.3 and 8.4 the pool has no `fatal_error_backtraces`, which PHP introduced with 8.5.
+For applications that do not run on the newest PHP yet, the same image is also published on the older PHP branches that still get security fixes: `mwaeckerlin/php-fpm:8.4` from `php:8.4-fpm-alpine` and `mwaeckerlin/php-fpm:8.3` from `php:8.3-fpm-alpine`, each also with the day of the build and the version, e.g. `8.4-20261031` and `8.4-1.2.14`. They carry the same modules and configuration and are rebuilt in the same hourly check as `latest`. On PHP 8.3 and 8.4 the pool has no `fatal_error_backtraces`, which PHP introduced with 8.5.
 
 To build on another PHP branch yourself, pass the official image: `docker compose build --build-arg PHP_IMAGE=php:8.4-fpm-alpine`.
 
