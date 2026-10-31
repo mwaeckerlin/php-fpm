@@ -12,6 +12,8 @@ RUN case " $PHP_MODULES " in *" imagick "*) apk add --no-cache imagemagick-svg l
 RUN rm -f /usr/local/etc/php-fpm.d/*.conf /usr/local/etc/php-fpm.conf.default
 COPY php-fpm.conf /usr/local/etc/php-fpm.conf
 COPY www.conf /usr/local/etc/php-fpm.d/www.conf
+# fatal_error_backtraces exists from PHP 8.5; an older php-fpm logs an error for a pool setting it does not know
+RUN if php -r 'exit(ini_get("fatal_error_backtraces") === false ? 0 : 1);'; then sed -i '/fatal_error_backtraces/d' /usr/local/etc/php-fpm.d/www.conf; fi
 COPY php.ini /usr/local/etc/php/php.ini
 RUN ln -s /usr/local/sbin/php-fpm /usr/sbin/php-fpm && ln -s /usr/local/bin/php /usr/bin/php
 RUN tar cph \

@@ -52,8 +52,11 @@ else
         _fail "${IMAGE}_log_errors_on" "pool does not log errors to stderr"
     fi
 
-    # CVE-2026-109619
-    if grep -Eq 'fatal_error_backtraces\] = (off|no|0)' <<<"${CONFIG}"; then
+    # CVE-2026-109619; PHP before 8.5 has no fatal_error_backtraces and writes none
+    BACKTRACES=$(docker run --rm --pull=never --entrypoint /usr/bin/php "${IMAGE}" -r 'echo ini_get("fatal_error_backtraces") === false ? "absent" : "present";' 2>&1)
+    if [[ "${BACKTRACES}" == absent ]] && ! grep -q 'fatal_error_backtraces' <<<"${CONFIG}"; then
+        _pass "${IMAGE}_fatal_error_backtraces_locked (PHP without the setting)"
+    elif [[ "${BACKTRACES}" == present ]] && grep -Eq 'fatal_error_backtraces\] = (off|no|0)' <<<"${CONFIG}"; then
         _pass "${IMAGE}_fatal_error_backtraces_locked"
     else
         _fail "${IMAGE}_fatal_error_backtraces_locked" "the pool does not lock fatal_error_backtraces off"
@@ -159,7 +162,14 @@ else
         fi
         sleep 1
     done
+    # php-fpm logs «Unable to set php_admin_value» for a pool setting its PHP does not know
+    STARTLOG=$(docker logs "${CONTAINER}" 2>&1)
     docker stop "${CONTAINER}" > /dev/null 2>&1
+    if grep -q 'Unable to set' <<<"${STARTLOG}"; then
+        _fail "${IMAGE}_pool_settings_known" "$(grep 'Unable to set' <<<"${STARTLOG}" | tr '\n' ' ')"
+    else
+        _pass "${IMAGE}_pool_settings_known"
+    fi
     if [[ "${HEALTHY}" == yes ]]; then
         _pass "${IMAGE}_healthy_with_php_fpm"
     else

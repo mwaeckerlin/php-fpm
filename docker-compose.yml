@@ -6,6 +6,26 @@ services:
       - type: bind
         source: ./index.php
         target: /app/index.php
+
+  # the same image on the older PHP branches that still get security fixes,
+  # for applications that do not run on the current PHP yet; no container is
+  # started from these
+  php-fpm-8.3:
+    image: mwaeckerlin/php-fpm:8.3
+    build:
+      context: .
+      args:
+        PHP_IMAGE: php:8.3-fpm-alpine
+    scale: 0
+
+  php-fpm-8.4:
+    image: mwaeckerlin/php-fpm:8.4
+    build:
+      context: .
+      args:
+        PHP_IMAGE: php:8.4-fpm-alpine
+    scale: 0
+
   nginx:
     image: mwaeckerlin/nginx
     ports:

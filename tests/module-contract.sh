@@ -2,12 +2,16 @@
 # Module contract: php-fpm and the PHP CLI load every module of
 # tests/expected-modules.txt.
 #
-# Usage: tests/module-contract.sh IMAGE
+# With a PHP branch such as 8.4, it also checks that php-fpm and the PHP CLI
+# run exactly that branch, which the tag of the image promises.
+#
+# Usage: tests/module-contract.sh IMAGE [PHP_BRANCH]
 
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
-IMAGE="${1:?usage: tests/module-contract.sh IMAGE}"
+IMAGE="${1:?usage: tests/module-contract.sh IMAGE [PHP_BRANCH]}"
+BRANCH="${2:-}"
 PASS=0
 FAIL=0
 declare -a FAILED_NAMES
@@ -33,6 +37,14 @@ for binary in /usr/sbin/php-fpm /usr/bin/php; do
         _pass "${name}"
     else
         _fail "${name}" "missing: $(echo ${missing}); loaded: $(echo ${loaded})"
+    fi
+    if [[ -n "${BRANCH}" ]]; then
+        version=$(docker run --rm --pull=never --entrypoint "${binary}" "${IMAGE}" -v 2>&1 | head -n 1)
+        if [[ "${version}" == "PHP ${BRANCH}."* ]]; then
+            _pass "php_branch_of_$(basename "${binary}") (${BRANCH})"
+        else
+            _fail "php_branch_of_$(basename "${binary}")" "expected PHP ${BRANCH}, got: ${version}"
+        fi
     fi
 done
 

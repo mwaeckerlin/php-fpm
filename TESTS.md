@@ -30,6 +30,9 @@ pytest runs against the real compose stack.
 - **F9** `tests/config-contract.sh` › unhealthy_without_php_fpm, healthy_with_php_fpm, healthcheck_declared — `health.php` fails without a running php-fpm, gets `pong` from the running one, and the image declares it as `HEALTHCHECK`.
 - **F7** `tests/config-contract.sh` › shell_functions_disabled_in_php_fpm, shell_functions_disabled_in_cli_proc_open_kept — `php-fpm -i` lists `exec,shell_exec,system,passthru` in `disable_functions`, and the PHP CLI sees those four as missing and `proc_open` as present.
 - **F7** `tests/image-contract.sh` › no sh, no bash, no busybox, no perl — the shipped image is headless.
+- **F11** `tests/image-contract.sh`, `tests/config-contract.sh` and `tests/module-contract.sh` run every check above also against `mwaeckerlin/php-fpm:8.3` and `mwaeckerlin/php-fpm:8.4`.
+- **F11** `tests/module-contract.sh` › php_branch_of_php-fpm, php_branch_of_php: php-fpm and the PHP CLI of `mwaeckerlin/php-fpm:8.3` report PHP 8.3, those of `mwaeckerlin/php-fpm:8.4` PHP 8.4.
+- **F11** `tests/config-contract.sh` › fatal_error_backtraces_locked, pool_settings_known: on PHP 8.5 the pool locks `fatal_error_backtraces` off, on PHP 8.3 and 8.4 the setting does not exist and the pool does not name it; the start log of php-fpm carries no «Unable to set».
 
 ## Workflow contract
 

@@ -1,5 +1,8 @@
 # Changelog
 
+- 2026-10-31 **1.2.13**
+    - The image is also published on the older PHP branches that still get security fixes: `mwaeckerlin/php-fpm:8.4` with PHP 8.4 and `mwaeckerlin/php-fpm:8.3` with PHP 8.3, both on the releases of 21 October 2026 that fix CVE-2026-109618 and CVE-2026-109619, for applications that do not run on PHP 8.5 yet
+
 - 2026-10-23 **1.2.12**
     - PHP reports `exec`, `shell_exec`, `system` and `passthru` as disabled: the image has no shell, so they could never run a command, and an application that checks `function_exists()` now takes its own way; `proc_open` stays available. Whoever calls these four without checking gets an error from PHP instead of a failed fork
     - The config contract no longer fails at random: checks that piped the output of `php-fpm -tt` into `grep -q` failed whenever `grep` stopped reading first and php-fpm died on the closed pipe; it happened once on arm64
